@@ -3,6 +3,6 @@
     "psr-4": {"App\\": "src/"}
   },
   "require": {
-    "kub-at/php-simple-html-dom-parser": "1.9.1"
+    "voku/simple_html_dom": "4.7.17"
   }
 }
