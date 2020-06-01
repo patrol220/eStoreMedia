@@ -2,7 +2,7 @@
 
 namespace App\Parser\Model;
 
-class ResponseProductModel
+class CsvProductModel
 {
     /** @var string */
     private $name;
@@ -22,26 +22,14 @@ class ResponseProductModel
     /** @var int */
     private $starsCount;
 
-    /** @var string */
-    private $priceOld;
-
-    /** @var string */
-    private $productCode;
-
-    /** @var ProductVariantModel[] */
-    private $productVariants;
-
     /**
-     * ResponseProductModel constructor.
+     * CsvProductModel constructor.
      * @param string $name
      * @param string $productUrl
      * @param string $photoUrl
      * @param string $price
      * @param int $ratesCount
      * @param int $starsCount
-     * @param string $priceOld
-     * @param string $productCode
-     * @param ProductVariantModel[] $productVariants
      */
     public function __construct(
         string $name,
@@ -49,10 +37,7 @@ class ResponseProductModel
         string $photoUrl,
         string $price,
         int $ratesCount,
-        int $starsCount,
-        string $priceOld,
-        string $productCode,
-        array $productVariants
+        int $starsCount
     ) {
         $this->name = $name;
         $this->productUrl = $productUrl;
@@ -60,56 +45,54 @@ class ResponseProductModel
         $this->price = $price;
         $this->ratesCount = $ratesCount;
         $this->starsCount = $starsCount;
-        $this->priceOld = $priceOld;
-        $this->productCode = $productCode;
-        $this->productVariants = $productVariants;
     }
 
+
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @return string
+     */
     public function getProductUrl(): string
     {
         return $this->productUrl;
     }
 
+    /**
+     * @return string
+     */
     public function getPhotoUrl(): string
     {
         return $this->photoUrl;
     }
 
+    /**
+     * @return string
+     */
     public function getPrice(): string
     {
         return $this->price;
     }
 
+    /**
+     * @return int
+     */
     public function getRatesCount(): int
     {
         return $this->ratesCount;
     }
 
+    /**
+     * @return int
+     */
     public function getStarsCount(): int
     {
         return $this->starsCount;
-    }
-
-    public function getPriceOld(): string
-    {
-        return $this->priceOld;
-    }
-
-    public function getProductCode(): string
-    {
-        return $this->productCode;
-    }
-
-    /**
-     * @return ProductVariantModel[]
-     */
-    public function getProductVariants(): array
-    {
-        return $this->productVariants;
     }
 }

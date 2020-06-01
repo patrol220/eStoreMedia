@@ -2,6 +2,7 @@
 
 namespace App\Parser\Service;
 
+use App\Parser\Model\ProductVariantModel;
 use App\Parser\Model\ResponseProductModel;
 use voku\helper\HtmlDomParser;
 
@@ -14,6 +15,12 @@ class SiteCommunicationService
     public function __construct()
     {
         $this->curlSession = curl_init();
+        curl_setopt($this->curlSession, CURLOPT_RETURNTRANSFER, true);
+    }
+
+    public function __destruct()
+    {
+        curl_close($this->curlSession);
     }
 
     public function getProductsIdsFromPage(int $page): array
@@ -21,9 +28,7 @@ class SiteCommunicationService
         $url = self::BASE_URL . 'index.php?page=' . $page;
 
         curl_setopt($this->curlSession, CURLOPT_URL, $url);
-        curl_setopt($this->curlSession, CURLOPT_RETURNTRANSFER, true);
         $head = curl_exec($this->curlSession);
-//        $httpCode = curl_getinfo($this->curlSession, CURLINFO_HTTP_CODE);
 
         return $this->parsePageResponse($head);
     }
@@ -33,15 +38,9 @@ class SiteCommunicationService
         $url = self::BASE_URL . 'product.php?id=' . $id;
 
         curl_setopt($this->curlSession, CURLOPT_URL, $url);
-        curl_setopt($this->curlSession, CURLOPT_RETURNTRANSFER, true);
         $head = curl_exec($this->curlSession);
 
         return $this->parseProductResponse($head, $url);
-    }
-
-    public function closeSession()
-    {
-        curl_close($this->curlSession);
     }
 
     private function parsePageResponse(string $response): array
@@ -51,13 +50,9 @@ class SiteCommunicationService
         $productsIds = [];
 
         $productsCards = $dom
-            ->find('.container')
-            ->find('.row')
-            ->find('.col-lg-9')
-            ->find('.row')
-            ->findMultiOrFalse('.col-lg-4');
+            ->findMultiOrFalse('.container .row .col-lg-9 .row .col-lg-4');
 
-        if($productsCards === false) {
+        if ($productsCards === false) {
             return [];
         }
 
@@ -81,7 +76,7 @@ class SiteCommunicationService
         $name = $productBase->findOne('.mb-0 h3')->text();
         $photoUrl = $productBase->findOne('.row .col-12 .card img')->getAttribute('src');
         $price = $productBase->findOne('.price')->text();
-        if(empty($price)) {
+        if (empty($price)) {
             $price = $productBase->findOne('.price-promo')->text();
         }
 
@@ -99,6 +94,30 @@ class SiteCommunicationService
             }
         }
 
-        return new ResponseProductModel($name, $productUrl, $photoUrl, $price, $ratesCount, $starsCount);
+        $priceOld = $productBase->findOne('.price-old')->text();
+
+        $jsonProductData = json_decode($productBase->findOne('.card .card-body script')->text(), true);
+        $productData = $jsonProductData['products'];
+        $productCode = $productData['code'];
+
+        $variants = [];
+
+        if (array_key_exists('variants', $productData)) {
+            foreach ($productData['variants'] as $variantName => $variantData) {
+                $variants[] = new ProductVariantModel($variantName, $variantData['price'], $variantData['price_old']);
+            }
+        }
+
+        return new ResponseProductModel(
+            $name,
+            $productUrl,
+            $photoUrl,
+            $price,
+            $ratesCount,
+            $starsCount,
+            $priceOld,
+            $productCode,
+            $variants
+        );
     }
 }

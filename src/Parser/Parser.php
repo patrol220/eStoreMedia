@@ -18,11 +18,11 @@ class Parser
 
     public function parseAndSaveData()
     {
-        $this->csvService->createCsvFile();
+        $this->csvService->clearAndCreateCsvFile();
 
         $currentPage = 1;
         $productsIds = $this->siteCommunicationService->getProductsIdsFromPage($currentPage);
-        do {
+        while (!empty($productsIds)) {
             foreach ($productsIds as $productId) {
                 $product = $this->siteCommunicationService->getProduct($productId);
                 $this->csvService->saveProduct($product);
@@ -30,8 +30,6 @@ class Parser
 
             $currentPage++;
             $productsIds = $this->siteCommunicationService->getProductsIdsFromPage($currentPage);
-        } while (!empty($productsIds));
-
-        $this->siteCommunicationService->closeSession();
+        };
     }
 }
